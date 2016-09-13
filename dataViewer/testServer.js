@@ -10,16 +10,13 @@ io.on('connection', function (socket) {
   recursiveY(socket);
   recursiveX(socket);
   addCube(socket, 0);
-  socket.on('my other event', function (data) {
-    console.log(data);
-  });
 });
 
 var recursiveY = function(socket) {
   setTimeout(function() {
     socket.emit('rotatey', 'rotating y');
     recursiveY(socket);
-  }, 100);
+  }, 25);
 };
 
 var recursiveX = function(socket) {
@@ -35,6 +32,6 @@ var addCube = function(socket, pos) {
     setTimeout(function() {
       socket.emit('addCube', newPos);
       addCube(socket, pos+2);
-    }, 100);
+    }, 0);
   }
 };

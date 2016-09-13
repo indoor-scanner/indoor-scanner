@@ -30,15 +30,14 @@
       camera.position.z = 15;
 
       var createCube = function(x) {
-        var color = 0x003000 + offSet;
-        console.log(color);
+        var color = 0x000060 + offSet;
         var geometry = new THREE.BoxGeometry( 1, 1, 1 );
         var material = new THREE.MeshBasicMaterial({ 
           color: color,
           wireframe: true 
         });
 
-        offSet += 0x000200;
+        offSet += 0x020000;
         var cube = new THREE.Mesh( geometry, material );
 
         cube.translateX(currentX + x);
