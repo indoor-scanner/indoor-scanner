@@ -29,6 +29,11 @@
       document.body.appendChild( renderer.domElement );
       camera.position.z = 15;
 
+      // prepare controls
+      var controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.target = new THREE.Vector3(0, 0, 0);
+      controls.maxDistance = 2000;
+
       var createCube = function(x) {
         var color = 0x000060 + offSet;
         var geometry = new THREE.BoxGeometry( 1, 1, 1 );
