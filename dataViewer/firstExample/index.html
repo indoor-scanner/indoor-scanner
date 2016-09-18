@@ -40,8 +40,9 @@
         offSet += 0x020000;
         var cube = new THREE.Mesh( geometry, material );
 
-        cube.translateX(currentX + x);
-        cube.translateY(currentY);
+        cube.translateX(x[0]);
+        cube.translateY(x[1]);
+        cube.translateZ(x[2]);
         cubes.push(cube);
         // increment the y value for future cubes
         if (cubes.length % 10 == 0 && cubes.length > 0) {
