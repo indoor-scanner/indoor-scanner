@@ -27,9 +27,12 @@ void setup()
   pinMode(SERIAL_TX_PIN, OUTPUT);
   pinMode(11, INPUT);
   Serial.begin(9600);
+  Serial.flush();
   sf02.setAuxUartBaudRate(9600);
   sf02Serial.begin(9600);
+  sf02Serial.flush();
   sf02.begin(sf02Serial);
+  sf02Serial.flush();
 }
 
 void loop()

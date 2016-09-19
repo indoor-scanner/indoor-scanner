@@ -185,13 +185,14 @@ bool SF02::updateResult()
 	char c = 0;
 	
 	if (_requestDistance == true)
-	{
+	{      
 		_serialSF02->write("d");
 		_requestDistance = false;
 	}
 		
 	if (_serialSF02->available())
 	{
+                _serialSF02->flush();
 		c = _serialSF02->read();
 		_buffer[_bufferPos++] = c;
 		
