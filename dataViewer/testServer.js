@@ -9,8 +9,9 @@ server.listen(8000);
 io.on('connection', function (socket) {
   recursiveY(socket);
   recursiveX(socket);
-  points = genSpherePts(200);
-  addCube(socket, points, 200-1);
+  var size = 1000;
+  points = genSpherePts(size);
+  addCube(socket, points, size-1);
 });
 
 var recursiveY = function(socket) {
@@ -34,7 +35,7 @@ var addCube = function(socket, points, index) {
     setTimeout(function() {
       socket.emit('addCube', newPos);
       addCube(socket, points, index-1);
-    }, 100);
+    }, 1);
   }
 };
 
