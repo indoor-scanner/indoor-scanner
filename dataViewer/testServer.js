@@ -4,7 +4,7 @@ var dataEmitter = new events.EventEmitter();
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
-var io = require('socket.io')(server);
+var socketIo = require('socket.io')(server);
 
 app.use(express.static(__dirname + '/firstExample'));
 server.listen(8000);
@@ -12,38 +12,30 @@ server.listen(8000);
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort; // localize object constructor
 
-var setPorts = function() {
+var setSerialPort = function() {
   return new Promise(function (resolve, reject) {
-    var portName = 'lol';
     serialport.list(function (err, ports) {
       if (err) { reject(err); }
-      ports.forEach(function(port) {
-        if (port.pnpId) {
-          portName = port.pnpId.includes('Arduino') ? port.comName : '/dev/ttyACM0';
-        }
-      });
+      var arduinoPort = ports.find(function (port) {
+        return port.pnpId.includes('Arduino');
+      })
+      var portName = typeof arduinoPort !== 'undefined' ? arduinoPort.comName : '/dev/ttyACM0';
       var returnVar = new SerialPort(portName, {
         parser: serialport.parsers.readline("\n"),
         baudRate: 115200
       });
       resolve(returnVar);
     });
-    // console.log(portName);
-
   });  
 };
 
-var sp;
-
-
-var init = function() {
+var init = function(sp, io) {
   sp.on("open", function () {
     console.log('sp has opened');
     sp.flush();
   });
 
   sp.on('data', function(data) {
-  // console.log('data');
   var points = data.split(/\s/).filter(Boolean);
 
   dataEmitter.emit('data', points);
@@ -52,13 +44,11 @@ var init = function() {
   io.on('connection', function (socket) {
     dataEmitter.on('data', (data) => {
       data = data.map(function (pt) {
-        return pt * 10;
+        return pt * 7;
       });
       socket.emit('addCube', data);
       console.log(data);
     });
-    var size = 1000;
-    points = genSpherePts(size);
   });
 };
 
@@ -81,11 +71,10 @@ var genSpherePts = function(size) {
   return pts;
 };
 
-setPorts()
+setSerialPort()
 .then(function (serialOb) {
-  sp = serialOb;
+  init(serialOb, socketIo)
 })
-.then(init)
 .catch(function (err) {
   console.log(err);
 })
