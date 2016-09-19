@@ -1,3 +1,6 @@
+var events = require('events');
+var dataEmitter = new events.EventEmitter();
+
 var express = require('express');
 var app = express();
 var server = require('http').Server(app);
@@ -6,37 +9,57 @@ var io = require('socket.io')(server);
 app.use(express.static(__dirname + '/firstExample'));
 server.listen(8000);
 
-io.on('connection', function (socket) {
-  recursiveY(socket);
-  recursiveX(socket);
-  var size = 1000;
-  points = genSpherePts(size);
-  addCube(socket, points, size-1);
-});
+var serialport = require("serialport");
+var SerialPort = serialport.SerialPort; // localize object constructor
 
-var recursiveY = function(socket) {
-  setTimeout(function() {
-    socket.emit('rotatey', 'rotating y');
-    recursiveY(socket);
-  }, 25);
+var setPorts = function() {
+  return new Promise(function (resolve, reject) {
+    var portName = 'lol';
+    serialport.list(function (err, ports) {
+      if (err) { reject(err); }
+      ports.forEach(function(port) {
+        if (port.pnpId) {
+          portName = port.pnpId.includes('Arduino') ? port.comName : '/dev/ttyACM0';
+        }
+      });
+      var returnVar = new SerialPort(portName, {
+        parser: serialport.parsers.readline("\n"),
+        baudRate: 115200
+      });
+      resolve(returnVar);
+    });
+    // console.log(portName);
+
+  });  
 };
 
-var recursiveX = function(socket) {
-  setTimeout(function() {
-    socket.emit('rotatex', 'rotating x');
-    recursiveX(socket);
-  }, 25);
-};
+var sp;
 
-var addCube = function(socket, points, index) {
-  if (index > 0) {
-    var newPos = points[index].map(function(point) {return point * 10});
-    //console.log(newPos);
-    setTimeout(function() {
-      socket.emit('addCube', newPos);
-      addCube(socket, points, index-1);
-    }, 1);
-  }
+
+var init = function() {
+  sp.on("open", function () {
+    console.log('sp has opened');
+    sp.flush();
+  });
+
+  sp.on('data', function(data) {
+  // console.log('data');
+  var points = data.split(/\s/).filter(Boolean);
+
+  dataEmitter.emit('data', points);
+  });
+
+  io.on('connection', function (socket) {
+    dataEmitter.on('data', (data) => {
+      data = data.map(function (pt) {
+        return pt * 10;
+      });
+      socket.emit('addCube', data);
+      console.log(data);
+    });
+    var size = 1000;
+    points = genSpherePts(size);
+  });
 };
 
 var genSpherePts = function(size) {
@@ -57,3 +80,12 @@ var genSpherePts = function(size) {
 
   return pts;
 };
+
+setPorts()
+.then(function (serialOb) {
+  sp = serialOb;
+})
+.then(init)
+.catch(function (err) {
+  console.log(err);
+})
