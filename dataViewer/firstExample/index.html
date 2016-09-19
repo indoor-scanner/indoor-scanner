@@ -9,6 +9,7 @@
   <body>
     <script src="libs/socket.io.js"></script>
     <script src="libs/three.js"></script>
+    <script src="libs/OrbitControls.js"></script>
     <script>
 
       // setting up socket
@@ -30,16 +31,15 @@
       camera.position.z = 15;
 
       // prepare controls
-      var controls = new THREE.OrbitControls(camera, renderer.domElement);
-      controls.target = new THREE.Vector3(0, 0, 0);
-      controls.maxDistance = 2000;
+      var controls = new THREE.OrbitControls(camera);
+      controls.addEventListener('change', render);
 
       var createCube = function(x) {
         var color = 0x000060 + offSet;
-        var geometry = new THREE.BoxGeometry( 1, 1, 1 );
-        var material = new THREE.MeshBasicMaterial({ 
+        var geometry = new THREE.BoxGeometry( 0.2, 0.2, 0.2 );
+        var material = new THREE.MeshBasicMaterial({
           color: color,
-          wireframe: true 
+          wireframe: true
         });
 
         offSet += 0x020000;
