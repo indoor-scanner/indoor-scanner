@@ -1,5 +1,7 @@
 var events = require('events');
 var dataEmitter = new events.EventEmitter();
+var fs = require('fs');
+var favicon = require('serve-favicon');
 
 var express = require('express');
 var app = express();
@@ -7,6 +9,8 @@ var server = require('http').Server(app);
 var socketIo = require('socket.io')(server);
 
 app.use(express.static(__dirname + '/originExample'));
+app.use(favicon(__dirname + '/originExample/images/favicon.ico'));
+
 server.listen(8000);
 
 var serialport = require("serialport");
@@ -29,8 +33,69 @@ var setSerialPort = function() {
   });  
 };
 
+var getQuadrantPts = function(vertices, quadrant) {
+  // works for xy plane objects only
+  switch (quadrant) {
+    case 1: return is_quad1(vertices);
+    case 2: return is_quad2(vertices);
+    case 3: return is_quad3(vertices);
+    case 4: return is_quad4(vertices); 
+    default:
+      throw ('Error in getQuadrantPts: Incorrect quadrant value.');
+  };
+};
+
+var is_quad1 = function(vertices) {
+  var newVertices = vertices.filter(function (vertex) {
+    return (vertex.x >= 0 && vertex.y >= 0);
+  });
+  return newVertices;
+};
+
+var is_quad2 = function(vertices) {
+  var newVertices = vertices.filter(function (vertex) {
+    return (vertex.x <= 0 && vertex.y >= 0);
+  });
+  return newVertices;
+};
+
+var is_quad3 = function(vertices) {
+  var newVertices = vertices.filter(function (vertex) {
+    return (vertex.x <= 0 && vertex.y <= 0);
+  });
+  return newVertices;
+};
+
+var is_quad4 = function(vertices) {
+  var newVertices = vertices.filter(function (vertex) {
+    return (vertex.x >= 0 && vertex.y <= 0);
+  });
+  return newVertices;
+};
+
+
 var init = function(sp, io) {
-  var testPoints = genSpherePts(1000000);
+  var room = genSpherePts(500, 50);
+
+  // var testPoints = room.vertices;
+  var testPoints = room.vertices;
+  var gridSize = room.max;
+
+  var quad1Pts = getQuadrantPts(room.vertices, 1);
+  var quad2Pts = getQuadrantPts(room.vertices, 2);
+  var quad3Pts = getQuadrantPts(room.vertices, 3);
+  var quad4Pts = getQuadrantPts(room.vertices, 4);
+
+  var triangles = [];
+
+  var minPts = Math.min.apply(null, [quad1Pts.length, quad2Pts.length, quad3Pts.length,
+                                     quad4Pts.length]);
+
+  // find which quadrant has the least amount of points
+  for (var i = 0; i < minPts; i++) {
+    var triangle = [quad1Pts[i], quad2Pts[i], quad3Pts[i], quad4Pts[i], quad1Pts[i]];
+    triangles.push(triangle);
+  };
 
   if (sp) {
     sp.on("open", function () {
@@ -38,24 +103,44 @@ var init = function(sp, io) {
       sp.flush();
     });
 
-    sp.on('data', function(data) {
+    sp.on('data', function (data) {
       var points = data.split(/\s/).filter(Boolean);
   
       dataEmitter.emit('data', points);
     });
   }
 
-  io.on('connection', function (socket) {
-    recursiveUpdate(socket, testPoints, 0);
-    // console.log(testPoints);
-  });
+  // io.on('connection', function (socket) {
+  //   recursiveUpdate(socket, testPoints, 0); // plot points
+  //   plotGrid(socket, gridSize);
+  //   recursiveTriangles(socket, triangles, 0);
+  //   // socket.emit('end'); // turn off updates
+  // });
+
+  var demo1 = function() {
+    io.on('connection', function (socket) {
+    recursiveUpdate(socket, testPoints, 0); // plot points
+    plotGrid(socket, gridSize);
+    // socket.emit('end'); // turn off updates
+    });
+  };
+
+  var demo2 = function() {
+    io.on('connection', function (socket) {
+    recursiveUpdate(socket, testPoints, 0); // plot points
+    plotGrid(socket, gridSize);
+    recursiveTriangles(socket, triangles, 0);
+    // socket.emit('end'); // turn off updates
+    });
+  };
+
+  demo1();
   
 };
 
-var genSpherePts = function(numPoints) {
+var genSpherePts = function(numPoints, scale) {
   var inc = Math.PI * (3 - Math.sqrt(5));
   var off = 2.0 / numPoints;
-  var scale = 50;
   var x, y, z, r, phi;
 
   var sphere = [];
@@ -73,13 +158,45 @@ var genSpherePts = function(numPoints) {
       z: 0
     };
     
-    point.x = x;
-    point.y = y;
-    point.z = z;
+    point.x = x * scale;
+    point.y = y * scale;
+    point.z = z * scale;
     sphere.push(point);
-  }
+  };
 
-  return sphere;
+  var room = {
+    vertices: sphere,
+    max: scale
+  };
+
+  return room;
+};
+
+var genCirclePts = function(numPoints, radius) {
+  var inc = 360 / numPoints;
+
+  var room = {
+    vertices: [],
+    max: 0
+  };
+
+  var points = [];
+  var x, y;
+  for (var i = 0; i < numPoints; i++) {
+    x = radius * Math.cos(inc * i);
+    y = radius * Math.sin(inc * i);
+    var point = {
+      x: x,
+      y: y,
+      z: 0
+    };
+    points.push(x);
+    points.push(y);
+    room.vertices.push(point);
+  };
+
+  room.max = Math.max.apply(null, points);
+  return room;
 };
 
 // setSerialPort()
@@ -89,7 +206,6 @@ var genSpherePts = function(numPoints) {
 // .catch(function (err) {
 //   console.log(err);
 // })
-
 
 init(serialOb = null, socketIo)
 // .then(function (plotOb) {
@@ -104,6 +220,7 @@ init(serialOb = null, socketIo)
 //   // console.log(scaledPoints);
 // })
 
+
 var recursiveUpdate = function(socket, points, index) {
   if (index < points.length) {
     setTimeout(function() {
@@ -116,6 +233,21 @@ var recursiveUpdate = function(socket, points, index) {
   }
 };
 
+var plotGrid = function(socket, gridSize) {
+  socket.emit('addGrid', gridSize);
+};
+
+var recursiveTriangles = function(socket, vertices, index) {
+  if (index < vertices.length) {
+    setTimeout(function() {
+      socket.emit('plotTriangles', vertices[index]);
+      recursiveTriangles(socket, vertices, index + 1);
+    }, 0);
+  }
+};
+
 var startPlot = function(socket) {
   socket.emit('start');
 };
+
+
