@@ -2,7 +2,7 @@
 #include "newStep.h"
 #include <SoftwareSerial.h>
 
-#define BAUD_RATE 9600
+#define BAUD_RATE 57600
 
 #define LIDAR_RX_PIN    8
 #define LIDAR_TX_PIN    9
