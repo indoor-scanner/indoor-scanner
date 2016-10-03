@@ -75,9 +75,8 @@ var is_quad4 = function(vertices) {
 
 
 var init = function(sp, io) {
-  var room = genSpherePts(500, 50);
-
-  // var testPoints = room.vertices;
+  var room = genCirclePts(5000, 50);
+  
   var testPoints = room.vertices;
   var gridSize = room.max;
 
