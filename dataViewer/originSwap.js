@@ -3,6 +3,7 @@ var dataEmitter = new events.EventEmitter();
 var fs = require('fs');
 var favicon = require('serve-favicon');
 var ip = require('ip');
+var net = require('net');
 
 var express = require('express');
 var app = express();
