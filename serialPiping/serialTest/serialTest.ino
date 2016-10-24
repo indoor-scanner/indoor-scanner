@@ -1,12 +1,25 @@
 int lock = 0;
+bool start = false;
 
 void setup() {
   // initialize serial communication at 9600 bits per second:
-  Serial.begin(115200);
+  Serial.begin(9600);
+  String inputString;
+
+  while(!start) {
+    while(Serial.available()) {
+      inputString = Serial.readString();
+      inputString.trim();
+    }
+    if (inputString == "start") {
+      start = true;
+      Serial.println("GOT START SIGNAL!!!");
+    }
+  }
 }
 
 void loop() {
-  int points = 1000;
+  int points = 10;
   double inc = PI * (3 - sqrt(5));
   double off = 2.0 / points;
   double x, y, z, r, phi;
@@ -20,10 +33,10 @@ void loop() {
     Serial.print(' ');
     Serial.print(y);
     Serial.print(' ');
-    Serial.println(z);  
+    Serial.println(z);
+    delay(50);
   }
   lock = 1;
-
 }
 
 

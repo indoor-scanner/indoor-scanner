@@ -2,6 +2,8 @@ var events = require('events');
 var dataEmitter = new events.EventEmitter();
 var fs = require('fs');
 var favicon = require('serve-favicon');
+var ip = require('ip');
+var net = require('net');
 
 var express = require('express');
 var app = express();
@@ -75,6 +77,7 @@ var is_quad4 = function(vertices) {
 
 
 var init = function(sp, io) {
+  var isWireless = true;
   var room = genSpherePts(5000, 50);
   
   var testPoints = room.vertices;
@@ -97,6 +100,7 @@ var init = function(sp, io) {
   };
 
   if (sp) {
+    isWireless = false;
     sp.on("open", function () {
       console.log('sp has opened');
       sp.flush();
@@ -107,6 +111,22 @@ var init = function(sp, io) {
   
       dataEmitter.emit('data', points);
     });
+  }
+
+  if (isWireless) {
+    TCPserver = net.createServer(function(socket){
+      console.log("Wirelessly connected to indoor-scanner.");
+      socket.on('data', function(buffer){
+        var data = buffer.toString();
+        var points = data.split(/\s/).filter(Boolean);
+        //dataEmitter.emit('data', points);
+        return console.log("got data: " + points);
+      });
+      socket.on('close', function(data){
+        console.log("CLOSED " + socket.remoteAddress + " " + socket.remotePort);
+      });
+    });
+    TCPserver.listen(8001, ip.address());
   }
 
   // io.on('connection', function (socket) {
