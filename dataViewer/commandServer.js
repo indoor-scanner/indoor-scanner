@@ -11,6 +11,17 @@ var socketIo = require('socket.io')(server);
 app.use(express.static(__dirname + '/keyboardCommands'));
 
 server.listen(8000);
+TCPserver = net.createServer(function(socket){
+  console.log("Wirelessly connected to indoor-scanner.");
+  socket.on('data', function(buffer){
+    var data = buffer.toString();
+    var point = data.split(/\s/).filter(Boolean);
+    dataEmitter.emit('data', point);
+  });
+  socket.on('close', function(data){
+    console.log("CLOSED " + socket.remoteAddress + " " + socket.remotePort);
+  });
+});
 
 counter = 0;
 
@@ -41,10 +52,12 @@ var setSerialPort = function() {
 var init = function(sp, io) {
   return new Promise(function (resolve, reject) {
   // were assuming the serial port is always valid for now
+    var isWireless = true;
     var pointCloudIndex = 0;
     var pointCloudString = 'point cloud data: ';
 
     if (sp) {
+      isWireless = false;
       sp.on('data', function(data) {
         console.log('-- Arduino --\n\t' + data);
         pointCloudIndex = data.toLowerCase().indexOf(pointCloudString);
@@ -54,6 +67,10 @@ var init = function(sp, io) {
           dataEmitter.emit('data', point);
         }
       });
+
+      if (isWireless) {
+        TCPserver.listen(8001, ip.address());
+      }
 
       sp.on("open", function () {
         console.log('sp has opened');
