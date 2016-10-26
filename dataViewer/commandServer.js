@@ -68,14 +68,14 @@ var init = function(sp, io) {
         }
       });
 
-      if (isWireless) {
-        TCPserver.listen(8001, ip.address());
-      }
-
       sp.on("open", function () {
         console.log('sp has opened');
         sp.flush();
       });
+    }
+
+    if (isWireless) {
+      TCPserver.listen(8001, ip.address());
     }
 
     io.on('connection', function (socket) {
