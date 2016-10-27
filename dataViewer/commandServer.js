@@ -197,6 +197,25 @@ var makeUnique = function(arr, is_equal) {
  return unique;
 };
 
+var sendCommand = function(conn, message) {
+  conn.write(command, function(err) {
+    if(err) {
+      console.log(err)
+    }
+    setTimeout(function() {
+      if(conn.drain) {
+        conn.drain(function() {
+          console.log(message);
+          lock = 0;
+        });
+      } else {
+        console.log(message);
+        lock = 0;
+      }
+    }, 100);
+  });
+}
+
 var startPlot = function(socket) {
   socket.emit('start');
 };
