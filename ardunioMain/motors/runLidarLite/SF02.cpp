@@ -132,13 +132,26 @@ float SF02::getDistance(int Timeout) {
 	if (!_initialised) {
 		return -1.0f;
 	}
+	int i = 0;
+
+	Serial.println("HERE");
+
+  // while(1) {
+  // 	if(digitalRead(A4)) { break; }
+  // }
+
+  Serial.println("READY TO READ");
+  
 	int val = 0;
 	
-	int i = 0;
+	unsigned char buffer[2];
 	unsigned char hi = 0;
 	unsigned char lo = 0;
+	_serialSF02->flush();
 
 	unsigned long startMillis = millis();
+
+	// normal scan routine
 	while (i < 2) {
 		if (millis() - startMillis >= Timeout) {
 			return -1.0f;
@@ -154,7 +167,32 @@ float SF02::getDistance(int Timeout) {
 			++i;
 		}
 	}
-	float total = (float)( hi) + ((float)lo/ 256);
+
+	// debugging
+
+	// user scan routine
+	// while (1) {
+	// 	if (millis() - startMillis >= Timeout) {
+	// 		return -1.0f;
+	// 	}
+
+	// 	if (_serialSF02->available()) {
+	// 		_serialSF02->readBytes(buffer, 2);
+	// 		hi = buffer[0];
+	// 		lo = buffer[1];
+	// 		break;
+	// 	}
+	// }
+
+
+	// _serialSF02->flush();
+	// Serial.println("debugging");
+	// Serial.println(hi);
+	// Serial.println(lo);
+	float total = (float)(hi) + ((float)lo / 256);
+	// if(total > 50) {
+	// 	return this->getDistance(100);
+	// }
 	return total;
 }
 
@@ -192,7 +230,7 @@ bool SF02::updateResult()
 		
 	if (_serialSF02->available())
 	{
-                _serialSF02->flush();
+    _serialSF02->flush();
 		c = _serialSF02->read();
 		_buffer[_bufferPos++] = c;
 		

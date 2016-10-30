@@ -1,6 +1,15 @@
 // #include "Arduino.h"
 #include "newStep.h"
 #include "SF02.h"
+#include <SoftwareSerial.h>
+
+#define BAUD_RATE 57600
+
+#define LIDAR_RX_PIN    11
+#define LIDAR_TX_PIN    12
+
+// SoftwareSerial ss(LIDAR_RX_PIN, LIDAR_TX_PIN);
+
 
 stepMotor::stepMotor() {
   read_iteration = 0;
@@ -8,7 +17,7 @@ stepMotor::stepMotor() {
   int speed = 0;
   originalRPM = 0;
   step_delay = 0;
-  number_of_steps = 200;
+  number_of_steps = 2038; // changed
   last_step_angle = 0;
   last_step_time = 0;
   step_number = 0;
@@ -26,14 +35,28 @@ stepMotor::stepMotor(SF02 sf02) {
 	int speed = 0;
   originalRPM = 0;
 	step_delay = 0;
-	number_of_steps = 200;
+	number_of_steps = 2038; // 200 for old motor
 	last_step_angle = 0;
 	last_step_time = 0;
 	step_number = 0;
 	degree = 0;
+
+  // SF02 sf02;
   lidarObject = sf02;
-  lidarObject.setAnalogInputPin(A4);
+  // // lidar setup
+  pinMode(LIDAR_RX_PIN, INPUT);
+  pinMode(LIDAR_TX_PIN, OUTPUT);
   pinMode(A4, INPUT);
+
+  // Serial.flush();
+
+  // lidarObject.setAuxUartBaudRate(BAUD_RATE);
+  // ss.begin(BAUD_RATE);
+  // ss.flush();
+  // lidarObject.begin(ss);
+  
+
+  // Serial.println(sf02.getDistance(100));
 
   pinMode(output_pins[0], OUTPUT);
   pinMode(output_pins[1], OUTPUT);
@@ -46,7 +69,7 @@ void stepMotor::increaseStep(int currentStep){
 	int angleCounter = 0;
 	float degreeInc = 0;
   // int output_pins[] = {8,9,10,11};
-  int output_pins[] = {A0, A1, A2, A3};
+  int output_pins[] = {A3, A2, A1, A0};
   // int output_pins[] = {7, 8, 9, 10};
    
 	// currently configured for pins 8,9,10,11
@@ -97,19 +120,6 @@ void stepMotor::increaseStep(int currentStep){
 
 	degree += degreeInc;
 
-  // int distance = 0;
-	// scan scan1;
-  // if(currentStep == 0){
-	//  distance = scan1.getDistance();
-        //}
-        //int distance = 0;
-	//Serial.print("Angle: ");
-  //Serial.print(degree);
-  //Serial.print(", ");
-  //Serial.print("Distance: ");
-  //Serial.println(distance);
-	// Serial.println(degree + " =  degree");
-
 }
 
 void stepMotor::setSpeed(int desiredSpeed) {
@@ -117,7 +127,13 @@ void stepMotor::setSpeed(int desiredSpeed) {
 	step_delay = 60L * 1000L * 1000L / number_of_steps / desiredSpeed;
 }
 
+void stepMotor::setLidar(SF02 sf02) {
+  lidarObject = sf02;
+}
+
 void stepMotor::step(int steps_to_move) {
+  float distance = 0;
+  int timeCount = 0;
 	int steps_left = abs(steps_to_move);
 
   // if steps_to_move is a negative value the motor spins in the
@@ -131,8 +147,11 @@ void stepMotor::step(int steps_to_move) {
 
 	while (steps_left > 0) {              
 		unsigned long current_step_time = micros();
+    distance = lidarObject.getDistance(100);
+    Serial.println(distance);
 		if (current_step_time - last_step_time >= step_delay) {
       // reset the speed and reset the delay
+      timeCount++;
       setSpeed(originalRPM);
 			last_step_time = current_step_time;
 			if (direction == 1) {
@@ -151,9 +170,8 @@ void stepMotor::step(int steps_to_move) {
       // Scanning based on steps
       // ------------------------------
       unsigned long startTime = micros();
-      float distance = 0;
-      // distance = lidarObject.getDistance(100);
-      distance = lidarObject.getAnalogDistance();
+      
+
       unsigned long endTime = micros();
       // compensate for the time it takes to read from lidar
 
@@ -169,11 +187,10 @@ void stepMotor::step(int steps_to_move) {
       }
 
       // print data to serial port
-      // Serial.print(distance);
       // whitespace
-      // Serial.print(" ");
-      // Serial.print("Here is the angle: ");
-      // Serial.println( abs(degree) );
+      // Serial.print(" "/);
+      Serial.print("Here is the angle: ");
+      Serial.println( abs(degree) );
 			steps_left--;
 
       // debugging the time it takes increase the step of the motor

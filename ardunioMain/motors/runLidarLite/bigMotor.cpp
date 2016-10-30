@@ -1,14 +1,22 @@
 // #include "Arduino.h"
-#include "newStep.h"
-#include "SF02.h"
+#include "bigMotor.h"
+#include "scan.h"
+#include <SoftwareSerial.h>
 
-stepMotor::stepMotor() {
+#define BAUD_RATE 57600
+
+#define LIDAR_RX_PIN    11
+#define LIDAR_TX_PIN    12
+
+// SoftwareSerial ss(LIDAR_RX_PIN, LIDAR_TX_PIN);
+
+bigMotor::bigMotor() {
   read_iteration = 0;
   direction = 0;
   int speed = 0;
   originalRPM = 0;
   step_delay = 0;
-  number_of_steps = 200;
+  number_of_steps = 200; // changed
   last_step_angle = 0;
   last_step_time = 0;
   step_number = 0;
@@ -20,19 +28,22 @@ stepMotor::stepMotor() {
   pinMode(output_pins[3], OUTPUT);
 }
 
-stepMotor::stepMotor(SF02 sf02) {
+bigMotor::bigMotor(scan lidarLite) {
   read_iteration = 0;
 	direction = 0;
 	int speed = 0;
   originalRPM = 0;
 	step_delay = 0;
-	number_of_steps = 200;
+	number_of_steps = 200; // 200 for old motor
 	last_step_angle = 0;
 	last_step_time = 0;
 	step_number = 0;
 	degree = 0;
-  lidarObject = sf02;
-  lidarObject.setAnalogInputPin(A4);
+
+  lidarObject = lidarLite;
+  // // lidar setup
+  pinMode(LIDAR_RX_PIN, INPUT);
+  pinMode(LIDAR_TX_PIN, OUTPUT);
   pinMode(A4, INPUT);
 
   pinMode(output_pins[0], OUTPUT);
@@ -42,12 +53,12 @@ stepMotor::stepMotor(SF02 sf02) {
 }
 
 
-void stepMotor::increaseStep(int currentStep){
+void bigMotor::increaseStep(int currentStep){
 	int angleCounter = 0;
 	float degreeInc = 0;
   // int output_pins[] = {8,9,10,11};
-  int output_pins[] = {A0, A1, A2, A3};
-  // int output_pins[] = {7, 8, 9, 10};
+  int output_pins[] = {A3, A2, A1, A0};
+  // int output_pins[] = {7, 6, 5, 4};
    
 	// currently configured for pins 8,9,10,11
   // output_pins[0-3]// 
@@ -97,27 +108,20 @@ void stepMotor::increaseStep(int currentStep){
 
 	degree += degreeInc;
 
-  // int distance = 0;
-	// scan scan1;
-  // if(currentStep == 0){
-	//  distance = scan1.getDistance();
-        //}
-        //int distance = 0;
-	//Serial.print("Angle: ");
-  //Serial.print(degree);
-  //Serial.print(", ");
-  //Serial.print("Distance: ");
-  //Serial.println(distance);
-	// Serial.println(degree + " =  degree");
-
 }
 
-void stepMotor::setSpeed(int desiredSpeed) {
+void bigMotor::setSpeed(int desiredSpeed) {
   originalRPM = desiredSpeed;
 	step_delay = 60L * 1000L * 1000L / number_of_steps / desiredSpeed;
 }
 
-void stepMotor::step(int steps_to_move) {
+void bigMotor::setLidar(scan lidarLite) {
+  lidarObject = lidarLite;
+}
+
+void bigMotor::step(int steps_to_move) {
+  float distance = 0;
+  int timeCount = 0;
 	int steps_left = abs(steps_to_move);
 
   // if steps_to_move is a negative value the motor spins in the
@@ -131,8 +135,11 @@ void stepMotor::step(int steps_to_move) {
 
 	while (steps_left > 0) {              
 		unsigned long current_step_time = micros();
+    // distance = lidarObject.getDistance();
+    Serial.println(distance);
 		if (current_step_time - last_step_time >= step_delay) {
       // reset the speed and reset the delay
+      timeCount++;
       setSpeed(originalRPM);
 			last_step_time = current_step_time;
 			if (direction == 1) {
@@ -151,9 +158,9 @@ void stepMotor::step(int steps_to_move) {
       // Scanning based on steps
       // ------------------------------
       unsigned long startTime = micros();
-      float distance = 0;
-      // distance = lidarObject.getDistance(100);
-      distance = lidarObject.getAnalogDistance();
+      
+      distance = lidarObject.getDistance();
+
       unsigned long endTime = micros();
       // compensate for the time it takes to read from lidar
 
@@ -169,11 +176,10 @@ void stepMotor::step(int steps_to_move) {
       }
 
       // print data to serial port
-      // Serial.print(distance);
       // whitespace
-      // Serial.print(" ");
-      // Serial.print("Here is the angle: ");
-      // Serial.println( abs(degree) );
+      // Serial.print(" "/);
+      Serial.print("Here is the angle: ");
+      Serial.println( abs(degree) );
 			steps_left--;
 
       // debugging the time it takes increase the step of the motor
@@ -184,7 +190,7 @@ void stepMotor::step(int steps_to_move) {
 	}
 }
 
-void stepMotor::debug(int someValue) {
+void bigMotor::debug(int someValue) {
 	Serial.println(someValue);
 }
 

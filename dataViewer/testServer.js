@@ -16,10 +16,11 @@ var setSerialPort = function() {
   return new Promise(function (resolve, reject) {
     serialport.list(function (err, ports) {
       if (err) { reject(err); }
-      var arduinoPort = ports.find(function (port) {
-        return port.pnpId.includes('Arduino');
-      })
-      var portName = typeof arduinoPort !== 'undefined' ? arduinoPort.comName : '/dev/ttyACM0';
+      // var arduinoPort = ports.find(function (port) {
+      //   return port.pnpId.includes('Arduino');
+      // })
+      // var portName = typeof arduinoPort !== 'undefined' ? arduinoPort.comName : '/dev/ttyACM0';
+      var portName = '/dev/ttyACM0';
       var returnVar = new SerialPort(portName, {
         parser: serialport.parsers.readline("\n"),
         baudRate: 115200

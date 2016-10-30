@@ -5,13 +5,12 @@ require('shelljs/global');
 function processResult(stdout) {  
     var lines = stdout.toString().split('\n');
     var results = new Array();
-    var returnVar = 0;
     lines.forEach(function(line) {
     	if(line == 'done'){
-    		returnVar = 1;
+    		return = 1;
     	}
     });
-    return returnVar;
+    return 0;
 };
 
 var test = '';

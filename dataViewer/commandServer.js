@@ -39,6 +39,7 @@ var setSerialPort = function() {
 };
 
 var init = function(sp, io) {
+  lock = 0;
   return new Promise(function (resolve, reject) {
   // were assuming the serial port is always valid for now
     var pointCloudIndex = 0;
@@ -50,6 +51,7 @@ var init = function(sp, io) {
         pointCloudIndex = data.toLowerCase().indexOf(pointCloudString);
         if (pointCloudIndex >= 0) {
           var pointString = data.slice(pointCloudString.length);
+          fs.appendFile('scan4.txt', pointString + '\n');
           var point = sphericalToCartesian(pointString);
           dataEmitter.emit('data', point);
         }
@@ -82,7 +84,7 @@ var init = function(sp, io) {
                 console.log('Starting Scan');
                 lock = 0;
               });
-            }, 100);
+            }, 50);
           });
         }
       });
@@ -97,7 +99,7 @@ var init = function(sp, io) {
                 console.log('Panning left');
                 lock = 0;
               });
-            }, 50);
+            }, 100);
           });
         }
       });
@@ -112,7 +114,7 @@ var init = function(sp, io) {
                 console.log('Panning right');
                 lock = 0;
               });
-            }, 50);
+            }, 100);
           });
         }
       });
@@ -201,12 +203,13 @@ var recursiveWrite = function(serialOb, index) {
 
 var sphericalToCartesian = function(pointString) {
   var stringArr = pointString.split(' ').filter(Boolean);
-  var radius = stringArr[0];
-  var phi = stringArr[1] * Math.PI / 180;
+  var radius = stringArr[0] * 0.01;
+  var theta = stringArr[1] * Math.PI / 180; 
+  var phi = stringArr[2] * Math.PI / 180;
   var point = {
-    x: radius * Math.sin(Math.PI/2) * Math.cos(phi),
-    y: radius * Math.sin(Math.PI/2) * Math.sin(phi),
-    z: radius * Math.cos(Math.PI/2) // TODO: fix later for varying theta
+    z: radius * Math.sin(phi) * Math.cos(theta),
+    x: radius * Math.sin(phi) * Math.sin(theta),
+    y: radius * Math.cos(phi) // TODO: fix later for varying theta
   };
   return point;
 };

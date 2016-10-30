@@ -134,9 +134,9 @@ float SF02::getDistance(int Timeout) {
 	}
 	int i = 0;
 
-  while(1) {
-  	if(digitalRead(A4)) { break; }
-  }
+  // while(1) {
+  // 	if(digitalRead(A4)) { break; }
+  // }
   
 	int val = 0;
 	

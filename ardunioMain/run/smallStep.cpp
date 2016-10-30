@@ -24,8 +24,8 @@ void smallMotor::increaseStep(int currentStep){
 
 	int angleCounter = 0;
 	float degreeInc = 0;
-  int output_pins[] = {8,9,10,11};
-  //int output_pins[] = {A0, A1, A2, A3};
+  // int output_pins[] = {8,9,10,11};
+  int output_pins[] = {A0, A1, A2, A3};
    
 
 	// currently configured for pins 8,9,10,11
