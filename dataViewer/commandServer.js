@@ -55,8 +55,10 @@ var init = function(sp, io) {
     var isWireless = true;
     var pointCloudIndex = 0;
     var pointCloudString = 'point cloud data: ';
+    var conn;
 
     if (sp) {
+      conn = sp
       isWireless = false;
       sp.on('data', function(data) {
         console.log('-- Arduino --\n\t' + data);
@@ -93,6 +95,13 @@ var init = function(sp, io) {
         if (!lock) {
           lock = 1;
           console.log(counter++);
+          sendCommand(conn, 'begin-scan', function (err) { 
+            if err {
+              throw(err)
+            }
+            lock = 0
+          });
+          /*
           sp.write('2 s', function() {
             setTimeout(function() {
               sp.drain(function() {
@@ -101,6 +110,7 @@ var init = function(sp, io) {
               });
             }, 100);
           });
+          */
         }
       });
 
@@ -197,21 +207,17 @@ var makeUnique = function(arr, is_equal) {
  return unique;
 };
 
-var sendCommand = function(conn, message) {
+var sendCommand = function(conn, message, callback) {
   conn.write(command, function(err) {
     if(err) {
-      console.log(err)
+      callback(err)
     }
     setTimeout(function() {
       if(conn.drain) {
-        conn.drain(function() {
-          console.log(message);
-          lock = 0;
-        });
-      } else {
-        console.log(message);
-        lock = 0;
+        conn.drain();
       }
+      console.log("Command sent: ", message);
+      callback();
     }, 100);
   });
 }
