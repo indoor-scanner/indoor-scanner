@@ -7,11 +7,17 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var socketIo = require('socket.io')(server);
+var net = require('net');
+var ip = require('ip')
+
+var conn;
 
 app.use(express.static(__dirname + '/keyboardCommands'));
 
 server.listen(8000);
 TCPserver = net.createServer(function(socket){
+  conn = socket;
+  // console.log(JSON.stringify(conn, null, 2));
   console.log("Wirelessly connected to indoor-scanner.");
   socket.on('data', function(buffer){
     var data = buffer.toString();
@@ -39,12 +45,12 @@ var setSerialPort = function() {
       // var arduinoPort = ports.find(function (port) {
       //   return port.pnpId.includes('Arduino');
       // })
-      var portName = typeof arduinoPort !== 'undefined' ? arduinoPort.comName : '/dev/ttyUSB0';
-      var returnVar = new SerialPort(portName, {
-        parser: serialport.parsers.readline("\n"),
-        baudRate: 57600
-      });
-      resolve(returnVar);
+      // var portName = typeof arduinoPort !== 'undefined' ? arduinoPort.comName : '/dev/ttyUSB1';
+      // var returnVar = new SerialPort(portName, {
+      //   parser: serialport.parsers.readline("\n"),
+      //   baudRate: 57600
+      // });
+      resolve(null);
     });
   });  
 };
@@ -55,7 +61,6 @@ var init = function(sp, io) {
     var isWireless = true;
     var pointCloudIndex = 0;
     var pointCloudString = 'point cloud data: ';
-    var conn;
 
     if (sp) {
       conn = sp
@@ -96,7 +101,7 @@ var init = function(sp, io) {
           lock = 1;
           console.log(counter++);
           sendCommand(conn, 'begin-scan', function (err) { 
-            if err {
+            if (err) {
               throw(err)
             }
             lock = 0
