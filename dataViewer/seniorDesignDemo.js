@@ -10,7 +10,7 @@ var socketIo = require('socket.io')(server);
 
 app.use(express.static(__dirname + '/keyboardCommands'));
 
-server.listen(8000);
+server.listen(7777);
 
 counter = 0;
 
