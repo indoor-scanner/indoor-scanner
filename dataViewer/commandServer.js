@@ -2,6 +2,8 @@ var events = require('events');
 var dataEmitter = new events.EventEmitter();
 var fs = require('fs');
 var favicon = require('serve-favicon');
+var child_process = require('child_process')
+var util = require('util')
 
 var express = require('express');
 var app = express();
@@ -51,8 +53,8 @@ var init = function(sp, io) {
         pointCloudIndex = data.toLowerCase().indexOf(pointCloudString);
         if (pointCloudIndex >= 0) {
           var pointString = data.slice(pointCloudString.length);
-          fs.appendFile('scan4.txt', pointString + '\n');
           var point = sphericalToCartesian(pointString);
+          fs.appendFile('scan4.txt', point + '\n');
           dataEmitter.emit('data', point);
         }
       });
@@ -162,6 +164,19 @@ var init = function(sp, io) {
 
   });
 };
+
+var potreeConvert = function(filename, callback) {
+  var command    = util.format('PotreeConverter %s -f xyz', filename);
+  var logMessage = util.format('Converting %s to potree format');
+  var result     = util.format('%s_converted');
+  console.log(logMessage)
+  if (callback == null) {
+    child_process.execSync(command);
+  } else {
+    child_process.exec(command, callback);
+  }
+  return result
+}
 
 var makeUnique = function(arr, is_equal) {
  var unique = [];
