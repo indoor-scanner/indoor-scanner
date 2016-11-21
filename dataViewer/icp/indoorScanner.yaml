@@ -8,7 +8,7 @@ referenceDataPointsFilters:
 
 matcher:
   KDTreeMatcher:
-    knn: 1
+    knn: 100
     epsilon: 0 
 
 outlierFilters:
@@ -20,7 +20,7 @@ errorMinimizer:
 
 transformationCheckers:
   - CounterTransformationChecker:
-      maxIterationCount: 40
+      maxIterationCount: 500
   - DifferentialTransformationChecker:
       minDiffRotErr: 0.001
       minDiffTransErr: 0.01
