@@ -1,14 +1,14 @@
 #include "stepperMotor.h"
 #include "I2C.h"
-#include "orientation.h"
-#include "scan.h" //TODO: Maybe not call this scan
+#include "orientation.h"2
+#include "LIDARLite.h" //TODO: Maybe not call this scan
 // #include <SoftwareSerial.h>
 #define BAUD_RATE 57600
 
 #define LIDAR_RX_PIN    11
 #define LIDAR_TX_PIN    12
 
-scan lidarLite;
+LIDARLite lidarLite;
 
 orientation pose;
 
@@ -28,7 +28,8 @@ int lock = 0;
 int flushCounter = 0;
 
 void setup() {
-  lidarLite.scanBegin();
+  lidarLite.begin(0, true);
+  lidarLite.configure(0);
   // motor setup
 
   // lidar setup
@@ -114,26 +115,26 @@ void loop() {
         Serial.println("Panning counter clockwise");
         motor2.startStepping(stepInc);
         // for (int i = 0; i <= 50; i++) {
-        //   float test = lidarLite.getDistance();
+        //   float test = lidarLite.distance(false);
         // }
-        // Serial.println(lidarLite.getDistance());
+        // Serial.println(lidarLite.distance(false));
         break;
       case 5:
         Serial.println("Panning clockwise");
         motor2.startStepping(-stepInc);
         // for (int i = 0; i <= 50; i++) {
-        //   float test = lidarLite.getDistance();
+        //   float test = lidarLite.distance(false);
         // }
-        // Serial.println(lidarLite.getDistance());
+        // Serial.println(lidarLite.distance(false));
         break;
       case 6:
         Serial.println("Tilting up");
-        pose.setDistance(lidarLite.getDistance());
+        pose.setDistance(lidarLite.distance(false));
         motor1.startStepping(stepInc);
         break;
       case 7:
         Serial.println("Tilting down");
-        pose.setDistance(lidarLite.getDistance());
+        pose.setDistance(lidarLite.distance(false));
         motor1.startStepping(-stepInc);
         break;
       case 8:

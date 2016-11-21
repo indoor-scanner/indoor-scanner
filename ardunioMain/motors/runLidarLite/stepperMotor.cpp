@@ -1,5 +1,5 @@
 #include "stepperMotor.h"
-#include "scan.h"
+#include "LIDARLite.h"
 #include "orientation.h"
 #include <SoftwareSerial.h>
 
@@ -144,7 +144,7 @@ void stepperMotor::setSpeed(int rpm) {
   stepDelay = 60L * 1000L * 1000L / numberOfSteps / rpm;
 }
 
-void stepperMotor::setLidar(scan lidarLite) {
+void stepperMotor::setLidar(LIDARLite lidarLite) {
   lidarObject = lidarLite;
 }
 
@@ -168,7 +168,7 @@ void stepperMotor::startStepping(int stepsToMove) {
 
   while (remainingSteps > 0) {
     currentStepTime = micros();
-    if (hasLidar) { distance = lidarObject.getDistance(); }
+    if (hasLidar) { distance = lidarObject.distance(false); }
     // Serial.println(distance);
     if (currentStepTime - lastStepTime >= stepDelay) {
       setSpeed(originalRPM);
@@ -192,7 +192,7 @@ void stepperMotor::startStepping(int stepsToMove) {
 
       // only scan on x/y steps 
       if (!invertAngle) {
-        distance = lidarObject.getDistance();
+        distance = lidarObject.distance(false);
         if (hasPose) {
           currentPose->setDistance(distance);
         }
