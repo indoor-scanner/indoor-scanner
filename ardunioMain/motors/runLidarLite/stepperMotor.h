@@ -1,7 +1,7 @@
 // stepper motor class
 #ifndef STEPPERMOTOR_H
 #define STEPPERMOTOR_H
-#include "scan.h"
+#include "LIDARLite.h"
 #include "orientation.h"
 #include <SoftwareSerial.h>
 
@@ -14,7 +14,7 @@ class stepperMotor {
     int getNumberOfSteps();
     void increaseStep(int currentStep);
     void setSpeed(int rpm);
-    void setLidar(scan lidarLite);
+    void setLidar(LIDARLite lidarLite);
     void startStepping(int stepsToMove);
     void reset();
   private:
@@ -28,7 +28,7 @@ class stepperMotor {
     unsigned long stepDelay;
     unsigned long numberOfSteps;
     unsigned long stepsCompleted;
-    scan lidarObject;
+    LIDARLite lidarObject;
     orientation *currentPose;
     bool invertAngle;
     bool hasPose;
