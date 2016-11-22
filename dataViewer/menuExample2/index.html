@@ -1,5 +1,6 @@
 <html>
   <head>
+    <script src="libs/jquery-3.1.1.min.js"></script>
     <!-- Latest compiled and minified CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -10,9 +11,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
     <link rel="stylesheet" type="text/css" href="css/style.css">
-    <script src="libs/jquery-3.1.1.min.js"></script>
    
-    
   </head>
   <body>
     <div class="menu-push container" id="container">
@@ -49,15 +48,102 @@
               <i class="glyphicon glyphicon-menu-down"></i> 
               <span class="menu-title">Tilt Down</span>
             </a>
+            <a style="outline: none;" href="#" data-toggle="modal" data-target="#pan-max-modal">
+              <i class="glyphicon glyphicon-cog"></i> 
+              <span class="menu-title">Set Max Angle (Pan)</span>
+            </a>
+            <a style="outline: none;" href="#" data-toggle="modal" data-target="#pan-min-modal">
+              <i class="glyphicon glyphicon-cog"></i> 
+              <span style="outline-width: 0;" class="menu-title">Set Min Angle (Pan)</span>
+            </a>
+            <a style="outline: none;" href="#" data-toggle="modal" data-target="#tilt-max-modal">
+              <i class="glyphicon glyphicon-cog"></i> 
+              <span class="menu-title">Set Max Angle (Tilt)</span>
+            </a>
+            <a style="outline: none;" href="#" data-toggle="modal" data-target="#tilt-min-modal">
+              <i class="glyphicon glyphicon-cog"></i> 
+              <span style="outline-width: 0;" class="menu-title">Set Min Angle (Tilt)</span>
+            </a>
             <a href="#">
               <i class="glyphicon glyphicon-cog"></i> 
               <span class="menu-title">Settings</span>
             </a>
         </nav>
-      
-        <div class="main">
-            
-            
+          <!-- modal for max angle -->
+          <div style="max-width: 350px; min-width: 300px; margin: auto" class="modal fade" id="pan-max-modal" role="dialog">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 style="text-align: center" class="modal-title">Enter Max Angle</h4>
+                </div>
+                <div class="modal-body">
+                  <input style="width: 100%"></input>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-info" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- modal for min angle -->
+          <div style="max-width: 350px; min-width: 300px; margin: auto" class="modal fade" id="pan-min-modal" role="dialog">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 style="text-align: center" class="modal-title">Enter Min Angle</h4>
+                </div>
+                <div class="modal-body">
+                  <input style="width: 100%"></input>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-info" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- modal for max angle (tilt) -->
+          <div style="max-width: 350px; min-width: 300px; margin: auto" class="modal fade" id="tilt-max-modal" role="dialog">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 style="text-align: center" class="modal-title">Enter Max Angle</h4>
+                </div>
+                <div class="modal-body">
+                  <input style="width: 100%"></input>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-info" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- modal for min angle (tilt) -->
+          <div style="max-width: 350px; min-width: 300px; margin: auto" class="modal fade" id="tilt-min-modal" role="dialog">
+            <div class="modal-dialog modal-sm">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 style="text-align: center" class="modal-title">Enter Min Angle</h4>
+                </div>
+                <div class="modal-body">
+                  <input style="width: 100%"></input>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-info" data-dismiss="modal">Save</button>
+                  <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
          <script type="text/javascript" src="js/index.js"></script>
         </div>
     </div>
