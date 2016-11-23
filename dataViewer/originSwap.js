@@ -14,6 +14,17 @@ app.use(express.static(__dirname + '/originExample'));
 app.use(favicon(__dirname + '/originExample/images/favicon.ico'));
 
 server.listen(8000);
+TCPserver = net.createServer(function(socket){
+  console.log("Wirelessly connected to indoor-scanner.");
+  socket.on('data', function(buffer){
+    var data = buffer.toString();
+    var point = data.split(/\s/).filter(Boolean);
+    dataEmitter.emit('data', point);
+  });
+  socket.on('close', function(data){
+    console.log("CLOSED " + socket.remoteAddress + " " + socket.remotePort);
+  });
+});
 
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort; // localize object constructor
@@ -212,18 +223,6 @@ var init = function(sp, io) {
 
 <<<<<<< Updated upstream
   if (isWireless) {
-    TCPserver = net.createServer(function(socket){
-      console.log("Wirelessly connected to indoor-scanner.");
-      socket.on('data', function(buffer){
-        var data = buffer.toString();
-        var points = data.split(/\s/).filter(Boolean);
-        //dataEmitter.emit('data', points);
-        return console.log("got data: " + points);
-      });
-      socket.on('close', function(data){
-        console.log("CLOSED " + socket.remoteAddress + " " + socket.remotePort);
-      });
-    });
     TCPserver.listen(8001, ip.address());
   }
 

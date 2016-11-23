@@ -9,10 +9,27 @@ var express = require('express');
 var app = express();
 var server = require('http').Server(app);
 var socketIo = require('socket.io')(server);
+var net = require('net');
+var ip = require('ip')
+
+var conn;
 
 app.use(express.static(__dirname + '/keyboardCommands'));
 
 server.listen(8000);
+TCPserver = net.createServer(function(socket){
+  conn = socket;
+  // console.log(JSON.stringify(conn, null, 2));
+  console.log("Wirelessly connected to indoor-scanner.");
+  socket.on('data', function(buffer){
+    var data = buffer.toString();
+    var point = data.split(/\s/).filter(Boolean);
+    dataEmitter.emit('data', point);
+  });
+  socket.on('close', function(data){
+    console.log("CLOSED " + socket.remoteAddress + " " + socket.remotePort);
+  });
+});
 
 counter = 0;
 
@@ -30,12 +47,12 @@ var setSerialPort = function() {
       // var arduinoPort = ports.find(function (port) {
       //   return port.pnpId.includes('Arduino');
       // })
-      var portName = typeof arduinoPort !== 'undefined' ? arduinoPort.comName : '/dev/ttyUSB0';
-      var returnVar = new SerialPort(portName, {
-        parser: serialport.parsers.readline("\n"),
-        baudRate: 57600
-      });
-      resolve(returnVar);
+      // var portName = typeof arduinoPort !== 'undefined' ? arduinoPort.comName : '/dev/ttyUSB1';
+      // var returnVar = new SerialPort(portName, {
+      //   parser: serialport.parsers.readline("\n"),
+      //   baudRate: 57600
+      // });
+      resolve(null);
     });
   });  
 };
@@ -44,10 +61,13 @@ var init = function(sp, io) {
   lock = 0;
   return new Promise(function (resolve, reject) {
   // were assuming the serial port is always valid for now
+    var isWireless = true;
     var pointCloudIndex = 0;
     var pointCloudString = 'point cloud data: ';
 
     if (sp) {
+      conn = sp
+      isWireless = false;
       sp.on('data', function(data) {
         console.log('-- Arduino --\n\t' + data);
         pointCloudIndex = data.toLowerCase().indexOf(pointCloudString);
@@ -65,6 +85,10 @@ var init = function(sp, io) {
       });
     }
 
+    if (isWireless) {
+      TCPserver.listen(8001, ip.address());
+    }
+
     io.on('connection', function (socket) {
       console.log('Client has connected');
 
@@ -80,6 +104,13 @@ var init = function(sp, io) {
         if (!lock) {
           lock = 1;
           console.log(counter++);
+          sendCommand(conn, 'begin-scan', function (err) { 
+            if (err) {
+              throw(err)
+            }
+            lock = 0
+          });
+          /*
           sp.write('2 s', function() {
             setTimeout(function() {
               sp.drain(function() {
@@ -88,6 +119,7 @@ var init = function(sp, io) {
               });
             }, 50);
           });
+          */
         }
       });
 
@@ -196,6 +228,21 @@ var makeUnique = function(arr, is_equal) {
  };
  return unique;
 };
+
+var sendCommand = function(conn, message, callback) {
+  conn.write(command, function(err) {
+    if(err) {
+      callback(err)
+    }
+    setTimeout(function() {
+      if(conn.drain) {
+        conn.drain();
+      }
+      console.log("Command sent: ", message);
+      callback();
+    }, 100);
+  });
+}
 
 var startPlot = function(socket) {
   socket.emit('start');
