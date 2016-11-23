@@ -30,7 +30,7 @@ var setSerialPort = function() {
       // var arduinoPort = ports.find(function (port) {
       //   return port.pnpId.includes('Arduino');
       // })
-      var portName = typeof arduinoPort !== 'undefined' ? arduinoPort.comName : '/dev/ttyUSB0';
+      var portName = typeof arduinoPort !== 'undefined' ? arduinoPort.comName : '/dev/cu.usbserial-12345678';
       var returnVar = new SerialPort(portName, {
         parser: serialport.parsers.readline("\n"),
         baudRate: 57600
