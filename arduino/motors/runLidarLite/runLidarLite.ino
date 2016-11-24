@@ -107,6 +107,7 @@ void loop() {
 
         motor1.reset();
         motor2.reset();
+        Serial.println("Finished scanning");
         break;
       case 3:
         Serial.println("Begin custom scan");
