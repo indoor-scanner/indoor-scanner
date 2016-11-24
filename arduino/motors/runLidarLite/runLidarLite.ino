@@ -1,15 +1,16 @@
 #include "stepperMotor.h"
 #include "I2C.h"
-#include "orientation.h"2
-#include "LIDARLite.h" //TODO: Maybe not call this scan
-// #include <SoftwareSerial.h>
+#include "orientation.h"
+#include "LIDARLite.h"
 #define BAUD_RATE 57600
 
 #define LIDAR_RX_PIN    11
 #define LIDAR_TX_PIN    12
 
+// create lidarLite object
 LIDARLite lidarLite;
 
+// create orientation object
 orientation pose;
 
 int pins1[4] = {10, 9, 8, 7};
@@ -23,21 +24,17 @@ int maxCommands = 10;
 String commands[10];
 String arguments[9];
 
-int firstRun = 1;
-int lock = 0;
-int flushCounter = 0;
-
 void setup() {
+  // lidarLite
   lidarLite.begin(0, true);
   lidarLite.configure(0);
-  // motor setup
 
-  // lidar setup
   pinMode(LIDAR_RX_PIN, INPUT);
   pinMode(LIDAR_TX_PIN, OUTPUT);
   pinMode(A4, INPUT);
   Serial.begin(57600);
   Serial.flush();
+
 
   motor1.setLidar(lidarLite);
   motor1.setSpeed(1);
@@ -49,7 +46,7 @@ void setup() {
   Serial.setTimeout(50); // may need to tweak it value that will not break
   for (int i = 0; i < maxCommands; i++) {
     // reserve 200 bytes for the commands
-    commands[i].reserve(200);  
+    commands[i].reserve(200);
   }
 }
 
@@ -57,17 +54,11 @@ void loop() {
   int stepInc = 1;
   int smallStepSize = 2;
 
-  // print the string when a newline arrives:
-  if (firstRun) {
-    // clearLidarBuffer();
-    firstRun = 0;
-  }
-
   String inputString = getSerial();
   if (inputString.length() > 0) {
-    Serial.println(inputString);  
+    Serial.println(inputString);
   }
-  
+
   if (inputString.length() > 1) {
     String temp = "";
     int count = 0;
@@ -83,7 +74,7 @@ void loop() {
     }
 
     int commandNumber = commands[0].toInt();
-    
+
     for (int i = 1; i < count; i++) {
       arguments[i-1] = commands[i];
     }
@@ -93,16 +84,14 @@ void loop() {
     switch (commandNumber) {
       case 0:
         Serial.println("Resetting");
-        break;
-      case 1:
-        Serial.println("Stopping scan");
+        softReset();
         break;
       case 2:
         Serial.println("Being normal scan");
         // normal routine
         for (int i = 0; i < (777 / smallStepSize); i++) {
           motor2.startStepping(200);
-          motor1.startStepping(-smallStepSize);  
+          motor1.startStepping(-smallStepSize);
         }
 
         motor1.reset();
@@ -188,66 +177,6 @@ void rotateRight(stepperMotor motor) {
   motor.startStepping(-1);
 }
 
-// Visit this url for more info http://playground.arduino.cc/Code/PrintFloats
-// printFloat prints out the float 'value' rounded to 'places' places after the decimal point
-void printFloat(float value, int places) {
-  // this is used to cast digits 
-  int digit;
-  float tens = 0.1;
-  int tenscount = 0;
-  int i;
-  float tempfloat = value;
-
-    // make sure we round properly. this could use pow from <math.h>, but doesn't seem worth the import
-  // if this rounding step isn't here, the value  54.321 prints as 54.3209
-
-  // calculate rounding term d:   0.5/pow(10,places)  
-  float d = 0.5;
-  if (value < 0)
-    d *= -1.0;
-  // divide by ten for each decimal place
-  for (i = 0; i < places; i++)
-    d/= 10.0;    
-  // this small addition, combined with truncation will round our values properly 
-  tempfloat +=  d;
-
-  // first get value tens to be the large power of ten less than value
-  // tenscount isn't necessary but it would be useful if you wanted to know after this how many chars the number will take
-
-  if (value < 0)
-    tempfloat *= -1.0;
-  while ((tens * 10.0) <= tempfloat) {
-    tens *= 10.0;
-    tenscount += 1;
-  }
-
-  // write out the negative if needed
-  if (value < 0)
-    Serial.print('-');
-
-  if (tenscount == 0)
-    Serial.print(0, DEC);
-
-  for (i=0; i< tenscount; i++) {
-    digit = (int) (tempfloat/tens);
-    Serial.print(digit, DEC);
-    tempfloat = tempfloat - ((float)digit * tens);
-    tens /= 10.0;
-  }
-
-  // if no places after decimal, stop now and return
-  if (places <= 0)
-    return;
-
-  // otherwise, write the point and continue on
-  Serial.print('.');  
-
-  // now write out each decimal place by shifting digits one by one into the ones place and writing the truncated value
-  for (i = 0; i < places; i++) {
-    tempfloat *= 10.0; 
-    digit = (int) tempfloat;
-    Serial.print(digit,DEC);  
-    // once written, subtract off that digit
-    tempfloat = tempfloat - (float) digit; 
-  }
+void softReset(){
+  asm volatile ("  jmp 0");
 }
