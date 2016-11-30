@@ -8,10 +8,11 @@ var app = express();
 var favicon = require('serve-favicon');
 var server = require('http').Server(app);
 var socketIo = require('socket.io')(server);
-
+var colormap = require('colormap');
 
 var events = require('events');
 var dataEmitter = new events.EventEmitter();
+dataEmitter.setMaxListeners(1);
 var fs = require('fs');
 var serialport = require("serialport");
 var SerialPort = serialport.SerialPort; // localize object constructor
@@ -25,6 +26,16 @@ counter = 0;
 var waiting = 0;
 
 var lock = 0;
+
+var numberOfShades = 50;
+var roomSize = 8;
+
+colormapOptions = {
+  colormap: 'jet',   // pick a builtin colormap or add your own 
+  nshades: numberOfShades,       // how many divisions 
+  format: 'rgbaString',     // "hex" or "rgb" or "rgbaString" 
+  alpha: 1           // set an alpha value or a linear alpha mapping [start, end] 
+};
 
 var setSerialPort = function() {
   return new Promise(function (resolve, reject) {
@@ -71,8 +82,7 @@ var init = function(sp, io) {
     io.on('connection', function (socket) {
       console.log('Client has connected');
 
-      plotGrid(socket, 20);
-        dataEmitter.on('data', (data) => {
+      dataEmitter.on('data', (data) => {
         console.log(data);
         socket.emit('addPoint', data);
       });
@@ -219,10 +229,6 @@ var sphericalToCartesian = function(pointString) {
   return point;
 };
 
-var plotGrid = function(socket, gridSize) {
-  socket.emit('addGrid', gridSize);
-};
-
 // initializes options for the server
 var serverInit = function() {
   return new Promise(function (resolve, reject) {
@@ -243,17 +249,26 @@ var serverInit = function() {
   });
 };
 
+var calculateDistance = function(point) {
+  return Math.sqrt( Math.pow(point.x, 2) + Math.pow(point.y, 2) + Math.pow(point.z, 2) );
+};
+
+var mapPointColor = function(point, colorArray) {
+  var distance = calculateDistance(point);
+  var index = Math.floor( (numberOfShades / roomSize).toFixed(2) * distance);
+  return colorArray[index];
+};
+
 var readScanFile = function(filename) {
   return new Promise(function (resolve, reject) {
+    var colorArray = colormap(colormapOptions);
     var lines = fs.readFileSync(filename, 'utf8').split('\n');
     lines.forEach(function (line) {
-      // console.log(line);
       var pointData = line.split(',').map(function (pointStuff) {
         return pointStuff.replace('\n', '');
       });
       var point = { x: pointData[0], y: pointData[1], z: pointData[2] };
-      console.log(JSON.stringify(point, null, 2));
-      console.log('line');
+      point.color = mapPointColor(point, colorArray);
       dataEmitter.emit('data', point);
     });
     resolve();
@@ -265,7 +280,7 @@ serverInit()
   return init(null, socketIo);
 })
 .then(function () {
-  return readScanFile('csv_scans/house1.csv');
+  return readScanFile('csv_scans/house3.csv');
 })
 .catch(function (err) {
   console.log(err);

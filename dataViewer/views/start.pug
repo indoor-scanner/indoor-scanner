@@ -1,0 +1,51 @@
+doctype html
+html  
+  head
+  meta(charset='UTF-8')
+  title= title
+  link(type='text/css' rel='stylesheet' href='css/semantic.min.css')
+  script(src="libs/socket.io.js")
+  script(src="libs/jquery-3.1.1.min.js")
+  script(src="js/semantic.min.js")
+  script(src="js/start-page.js")
+
+  link(rel="stylesheet" type="text/css" href="css/style.css")
+
+  div(class="ui borderless menu segment")
+    div(class="header item") 3D Room Scanner
+  div(style="padding-top: 20px")
+  div(class="ui raised very padded text container segment")
+    form(class="ui form")
+      div(class="field")
+        label Project Name
+        input(name="project-name" type="text")
+      div(class="field")
+        label Select Serial Port
+        select(id="serial" class="ui dropdown" name="dropdown-serial")
+          option(value="") Select
+      div(class="field")
+
+        label Select Color Scheme
+        div(class="ui inline dropdown")
+          div(class="text")
+            img(class="ui avatar image" src="images/color-schemes/sunset.png")
+          i(class="dropdown icon")
+          div(class="menu")
+            div(class="item")
+              img(class="ui avatar image" src="images/color-schemes/sunset.png")
+            div(class="item")
+              img(class="ui avatar image" src="images/color-schemes/cool.png")
+            div(class="item")
+              img(class="ui avatar image" src="images/color-schemes/portland.png")
+            div(class="item")
+              img(class="ui avatar image" src="images/color-schemes/YIGnBu.png")
+            div(class="item")
+              img(class="ui avatar image" src="images/color-schemes/inferno.png")
+            div(class="item")
+              img(class="ui avatar image" src="images/color-schemes/spring.png")                                  
+      div(class="ui submit button" onclick="navigateDataViewer()") Start!
+      div(class="ui refresh-serial button" style="float: right") Refresh Serial
+      div(class="ui error message")
+
+
+  script(src="js/form-logic.js")
