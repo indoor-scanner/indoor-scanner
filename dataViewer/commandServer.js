@@ -10,6 +10,10 @@ var app = express();
 var server = require('http').Server(app);
 var socketIo = require('socket.io')(server);
 
+// Arm lenths. Angle between lengths is assumed to be 90 degrees
+var A = 1 // length attached to joint
+var B = 2 // legth attached to sensor
+
 app.use(express.static(__dirname + '/keyboardCommands'));
 
 server.listen(8000);
@@ -53,7 +57,7 @@ var init = function(sp, io) {
         pointCloudIndex = data.toLowerCase().indexOf(pointCloudString);
         if (pointCloudIndex >= 0) {
           var pointString = data.slice(pointCloudString.length);
-          var point = sphericalToCartesian(pointString);
+          var point = sphericalToCartesian(compensateForArm(pointString));
           fs.appendFile('scan4.txt', point + '\n');
           dataEmitter.emit('data', point);
         }
@@ -228,6 +232,15 @@ var sphericalToCartesian = function(pointString) {
   };
   return point;
 };
+
+var compensateForArm = function(a, b, pointString) {
+  var pointArr = pointString.split(' ').filter(Boolean);
+  var L = pointArr[0] + b
+  var radius = Math.sqrt(L*L + a*a)
+  var theta  = pointArr[1] * Math.PI / 180; 
+  var phi    = pointArr[2] - Math.asin(a / radius)
+  return [radius, theta, phi]
+}
 
 var plotGrid = function(socket, gridSize) {
   socket.emit('addGrid', gridSize);
