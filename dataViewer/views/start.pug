@@ -18,13 +18,20 @@ html
     form(class="ui form")
       div(class="field")
         label Project Name
-        input(name="project-name" type="text")
+        input(name="projectName" type="text")
       div(class="field")
         label Select Serial Port
-        select(id="serial" class="ui dropdown" name="dropdown-serial")
+        select(id="serial" class="ui dropdown" name="serialPort")
           option(value="") Select
       div(class="field")
-
+        label Select Room Size
+        select(id="room" class="ui dropdown" name="roomSize")
+          option(value="10") 10 Meters
+          option(value="20") 20 Meters
+          option(value="30") 30 Meters
+          option(value="40") 40 Meters
+      div(class="field")
+      div(class="field")
         label Select Color Scheme
         div(class="ui inline dropdown")
           div(class="text")
@@ -43,9 +50,9 @@ html
               img(class="ui avatar image" src="images/color-schemes/inferno.png")
             div(class="item")
               img(class="ui avatar image" src="images/color-schemes/spring.png")                                  
-      div(class="ui submit button" onclick="navigateDataViewer()") Start!
+      div(class="ui submit button") Start!
       div(class="ui refresh-serial button" style="float: right") Refresh Serial
       div(class="ui error message")
-
+      
 
   script(src="js/form-logic.js")

@@ -3,8 +3,6 @@
 #include "orientation.h"
 #include <SoftwareSerial.h>
 
-#define BAUD_RATE 57600
-
 #define LIDAR_RX_PIN    11
 #define LIDAR_TX_PIN    12
 
@@ -148,7 +146,7 @@ void stepperMotor::setLidar(LIDARLite lidarLite) {
   lidarObject = lidarLite;
 }
 
-void stepperMotor::startStepping(int stepsToMove) {
+void stepperMotor::startStepping(int stepsToMove, bool printDistance) {
   float distance = 0;
   float phi = 0.0;
   float theta = 0.0;
@@ -215,7 +213,7 @@ void stepperMotor::startStepping(int stepsToMove) {
 
       // update the orientation, if the angle is inverted we 
       // need to update the phi angle, otherwise update theta angle
-      if (hasPose) {
+      if (hasPose && printDistance) {
         theta = currentPose->getTheta();
         phi = currentPose->getPhi();
         distance = currentPose->getDistance();

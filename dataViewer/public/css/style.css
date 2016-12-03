@@ -4,3 +4,17 @@ body {
   width: 100%;
   height: 100%;
 }
+.serial-select {
+  width: 80% !important;
+}
+.serial-icon {
+  display: block;
+}
+.close-icon {
+  float: right;
+  text-decoration: none;
+}
+
+.img-circle {
+    border-radius: 50%;
+}

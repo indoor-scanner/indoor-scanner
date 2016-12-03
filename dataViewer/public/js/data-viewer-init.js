@@ -1,13 +1,14 @@
 var socket = io.connect('http://localhost:8000');
 
-var scene, renderer, camera;
+var scene, renderer, camera, container, controls;
+
+var keyboardLock = false;
+
+var clock = new THREE.Clock();
 
 var i = 0;
 
 var particles = 100000;
-// var positions = new Float32Array(particles * 3);
-// var colors = new Float32Array(particles * 3);
-var color = new THREE.Color('rgb(0, 128, 255)');
 
 var geometry = new THREE.BufferGeometry();
 geometry.dynamic = true;
@@ -19,10 +20,10 @@ var positions = geometry.attributes.position.array;
 var colors = geometry.attributes.color.array;
 
 var material = new THREE.PointsMaterial({
-  size: .1,
+  size: 0.01,
   vertexColors: THREE.VertexColors,
   transparent: true,
-  opacity: 0.4
+  opacity: 0.9
 });
 
 init();
@@ -30,6 +31,8 @@ animate();
 
 function init() {
   // offset used to alter color
+  container = document.createElement( 'div' );
+  document.body.appendChild( container );
   var offSet = 0;
 
   // create scene
@@ -57,17 +60,19 @@ function init() {
     addGrid(max);
   });
 
-  socket.on('plotTriangles', function (vertices) {
-    triangulate(vertices);
-  });
-
   socket.on('end', function() {
     geometry.attributes.position.needsUpdate = false;
     geometry.attributes.color.needsUpdate = false;
   });
 
-  var controls = new THREE.OrbitControls(camera);
-  controls.addEventListener('change', render);
+  controls = new THREE.FirstPersonControls( camera );
+  controls.movementSpeed = 5;
+  controls.lookSpeed = 0.125;
+  controls.lookVertical = true;
+  controls.constrainVertical = true;
+  controls.verticalMin = 1.1;
+  controls.verticalMax = 2.2;
+  container.appendChild( renderer.domElement );
   window.addEventListener('resize', onWindowResize, false);
 };
 
@@ -95,7 +100,8 @@ function addPoint(pointOb) {
   positions[i]     = pointOb.x;
   positions[i + 1] = pointOb.y;
   positions[i + 2] = pointOb.z;
-
+  
+  var color = new THREE.Color(pointOb.color);
   colors[i]     = color.r;
   colors[i + 1] = color.g;
   colors[i + 2] = color.b;
@@ -105,24 +111,11 @@ function addPoint(pointOb) {
   geometry.attributes.color.needsUpdate = true;
 };
 
-function triangulate(vertices) {
-  var line_material = new THREE.LineBasicMaterial({
-    color: 0x00ff00,
-    transparent: true,
-    opacity: 0.2,
-  });
-  var line_geometry = new THREE.Geometry();
-  vertices.forEach(function (vertex) {
-    line_geometry.vertices.push(new THREE.Vector3(vertex.x, vertex.y, vertex.z));
-  });
-  var line = new THREE.Line(line_geometry, line_material);
-  scene.add(line);
-};
-
 function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  controls.handleResize();
 };
 
 
@@ -133,6 +126,8 @@ function animate() {
 };
 
 function render() {
+  var delta = clock.getDelta();
+  controls.update( delta );
   renderer.render(scene, camera);
 };
 

@@ -15,7 +15,7 @@ class stepperMotor {
     void increaseStep(int currentStep);
     void setSpeed(int rpm);
     void setLidar(LIDARLite lidarLite);
-    void startStepping(int stepsToMove);
+    void startStepping(int stepsToMove, bool printDistance);
     void reset();
   private:
     int output_pins[4];
