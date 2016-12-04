@@ -250,13 +250,15 @@ var mapPointColor = function(point, colorArray, roomSize) {
 
 var clientInit = () => {
   socketIo.on('connection', (socket) => {
-    exec('ls /dev/{tty,cu}.*', (error, stdout, stderr) => {
+    SerialPort.list((error, ports) => {
       if (error) {
         console.error(`exec error: ${error}`);
         return;
       }
-      var serialPorts = stdout.split('\n').filter(Boolean).map( (serialString) => {
-          return { value: serialString, text: serialString };
+      var serialPorts = ports.map((port) => {
+        return {value: port.comName, text: port.comName};
+      }).filter((serialObj) => {
+        return serialObj.value.toLowerCase().includes("usb")
       });
       socket.emit('serial-list', serialPorts);
       socket.on('viewer-options', function(options) {
