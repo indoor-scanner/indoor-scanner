@@ -18,6 +18,9 @@ console.log('Server is listening on port %d', PORT);
 const numberOfShades = 50;
 const scansDir = 'scans/';
 
+const A = 0.034;
+const B = 0.074;
+
 // globals :(
 var socketIo = require('socket.io')(server);
 var lock = 0;
@@ -78,7 +81,7 @@ var initDataViewer = function(scanner, socket, plotSettings) {
       var pointString = data.slice(pointCloudString.length);
       // TODO: implement file names with current time
       fs.appendFile(plotSettings.filename, pointString.split(' ').join(',') + '\n');
-      var point = sphericalToCartesian(pointString);
+      var point = sphericalToCartesian(compensateForArm(A, B, pointString));
       point.color = mapPointColor(point, plotSettings.colors, plotSettings.roomSize);
       socket.emit('addPoint', point);
     }
@@ -201,6 +204,15 @@ var sphericalToCartesian = function(pointString) {
     y: radius * Math.cos(phi) // TODO: fix later for varying theta
   };
   return point;
+};
+
+var compensateForArm = function(a, b, pointString) {
+  var point = pointString.split(' ').filter(Boolean).map((val) => parseFloat(val));
+  var L = point[0] + b;
+  var radius = Math.sqrt(L*L + a*a);
+  var theta  = point[1];
+  var phi    = point[2] - Math.asin(a / radius);
+  return [radius, theta, phi].join(' ')
 };
 
 // initializes options for the server
