@@ -82,8 +82,8 @@ var initDataViewer = function(scanner, socket, plotSettings) {
     if (pointCloudIndex >= 0) {
       var pointString = data.slice(pointCloudString.length);
       // TODO: implement file names with current time
-      fs.appendFile(plotSettings.filename, pointString.split(' ').join(',') + '\n');
       var point = sphericalToCartesian(compensateForArm(A, B, pointString));
+      fs.appendFile(plotSettings.filename, point.join(',') + '\n');
       point.color = mapPointColor(point, plotSettings.colors, plotSettings.roomSize);
       socket.emit('addPoint', point);
     } else if (finishedIndex >= 0) {
