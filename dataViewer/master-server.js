@@ -228,6 +228,10 @@ var serverInit = function() {
     );
   });
 
+  app.get('/scan', function (req, res) {
+    res.rende
+  })
+
   // app.get('/Pug', function (req, res) {
   //   res.render('pug-view',
   //     {
@@ -271,7 +275,7 @@ var clientInit = () => {
   });
 };
 
-var readScanFile = function(filename) {
+var readScanFile = function(filename, socket) {
   return new Promise(function (resolve, reject) {
     var colorArray = colormap(colormapOptions);
     var lines = fs.readFileSync(filename, 'utf8').split('\n');
