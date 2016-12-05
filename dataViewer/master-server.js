@@ -65,6 +65,7 @@ var initDataViewer = function(scanner, socket, plotSettings) {
   lock = 0
   var pointCloudIndex = 0;
   var pointCloudString = 'point cloud data: ';
+  var finishedString = 'finished scanning';
 
   socket.emit('addGrid', 20);
 
@@ -77,6 +78,7 @@ var initDataViewer = function(scanner, socket, plotSettings) {
   scanner.on('data', function(data) {
     console.log('-- Arduino --\n\t' + data);
     pointCloudIndex = data.toLowerCase().indexOf(pointCloudString);
+    finishedIndex = data.toLowerCase().indexOf(finishedString);
     if (pointCloudIndex >= 0) {
       var pointString = data.slice(pointCloudString.length);
       // TODO: implement file names with current time
@@ -84,6 +86,8 @@ var initDataViewer = function(scanner, socket, plotSettings) {
       var point = sphericalToCartesian(compensateForArm(A, B, pointString));
       point.color = mapPointColor(point, plotSettings.colors, plotSettings.roomSize);
       socket.emit('addPoint', point);
+    } else if (finishedIndex >= 0) {
+      potreeConverter(plotSettings.filename, plotSettings.filename + '_potree');
     }
   });
 
@@ -274,7 +278,7 @@ var clientInit = () => {
       });
       socket.emit('serial-list', serialPorts);
       socket.on('viewer-options', function(options) {
-        options.projectName = scansDir + options.projectName + '.csv';
+        options.projectName = scansDir + options.projectName + '.csv.xyz';
         roomSize = options.roomSize;
         fs.writeFileSync(options.projectName, '', 'utf8');
         scannerInit(options, socket);
@@ -297,6 +301,24 @@ var readScanFile = function(filename) {
     });
     resolve();
   });
+};
+
+var potreeConverter = function(filename, newfilename, callback) {
+  child_process.exec('PotreeConverter', (err, stdout, stderr) => {
+    if (err) { // Check if PotreeConverter is installed
+      return err;
+    }
+    var command    = util.format('PotreeConverter %s -o %s', filename, newfilename);
+    var logMessage = util.format('Converting %s to potree format', filename);
+    console.log(logMessage);
+    console.log(command);
+    if (callback == null) {
+      console.log(child_process.execSync(command).toString());
+    } else {
+      console.log(child_process.exec(command, callback).toString());
+    }
+    return null;
+  })
 };
 
 var start = function() {
