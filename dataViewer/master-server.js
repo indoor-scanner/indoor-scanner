@@ -10,8 +10,10 @@ const colormap = require('colormap');
 const fs = require('fs');
 const serialport = require("serialport");
 const SerialPort = serialport.SerialPort; 
+const open = require('open');
 
 server.listen(PORT);
+open('http://localhost:' + PORT);
 
 console.log('Server is listening on port %d', PORT);
 

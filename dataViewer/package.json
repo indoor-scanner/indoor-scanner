@@ -11,6 +11,7 @@
   "dependencies": {
     "colormap": "^2.2.0",
     "express": "^4.14.0",
+    "open": "0.0.5",
     "pug": "^2.0.0-beta6",
     "serialport": "^4.0.1",
     "serve-favicon": "^2.3.0",
