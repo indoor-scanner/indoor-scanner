@@ -94,7 +94,9 @@ void loop() {
 
         for (int i = 0; i < (777 / smallStepSize); i++) {
           motor1.startStepping(smallStepSize, false);
+          delay(20);
         }
+        
         motor1.reset();
         motor2.reset();
         Serial.println("Finished scanning");

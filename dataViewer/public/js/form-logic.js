@@ -3,6 +3,12 @@ function navigateDataViewer() {
   window.location = 'http://localhost:8000/dataviewer';
 };
 
+function goToDemo() {
+  sendFileName();
+  socket.emit('start-demo');
+  window.location = 'http://localhost:5000/dataviewer';
+};
+
 function formValidation() {
   $('.ui.form')
     .form({

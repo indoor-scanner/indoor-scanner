@@ -5,10 +5,11 @@ html
     meta(charset='UTF-8')
     title= title
   body(onload="addevt()")
+    div(class="potree")
     script(src="libs/three.js")
     script(src="libs/OrbitControls.js")
     script(src="js/controls/FirstPersonControls.js")
     script(src="libs/socket.io.js")
-    script(src="js/data-viewer-init.js")
+    script(src= dataViewerInit)
     script(src="js/arrow-keys.js")
     script(src="libs/jquery-3.1.1.min.js")

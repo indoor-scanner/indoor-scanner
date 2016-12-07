@@ -84,8 +84,12 @@ var initDataViewer = function(scanner, socket, plotSettings) {
     if (pointCloudIndex >= 0) {
       var pointString = data.slice(pointCloudString.length);
       // TODO: implement file names with current time
+      fs.appendFile(plotSettings.filename, pointString.split(' ').join(',') + '\n');
       var point = sphericalToCartesian(compensateForArm(A, B, pointString));
-      fs.appendFile(plotSettings.filename, point.join(',') + '\n');
+      var pointArr = Object.keys(point).map( (key) => {
+        return point.key;
+      });
+      // fs.appendFile(plotSettings.filename, pointArr.join(',') + '\n');
       point.color = mapPointColor(point, plotSettings.colors, plotSettings.roomSize);
       socket.emit('addPoint', point);
     } else if (finishedIndex >= 0) {
@@ -241,7 +245,8 @@ var serverInit = function() {
     res.render('index',
       {
         title: 'Data-Viewer',
-        header: 'We ready'
+        header: 'We ready',
+        dataViewerInit: 'js/data-viewer-init.js'
       }
     );
   });

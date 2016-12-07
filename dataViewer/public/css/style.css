@@ -18,3 +18,25 @@ body {
 .img-circle {
     border-radius: 50%;
 }
+
+
+a{
+  color: #0060B6;
+  text-decoration: none;
+}
+
+a:hover {
+  color:#00A0C6; 
+  text-decoration:none; 
+  cursor:pointer;  
+}
+
+.potree {
+  background-color: rgba(255, 255, 255, 0);
+  position: fixed;
+  /*text-decoration: none;*/
+  top: 5px;
+  left: 5 px;
+  width: 60px;
+  text-align: center;
+}
